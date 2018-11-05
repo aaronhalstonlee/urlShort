@@ -18,7 +18,12 @@ const urlSchema = new Schema({
 });
 const Shorty = mongoose.model('Shorty', urlSchema);
 
-const makeShort = url => url.length;
+const makeShort = (url) => {
+    var len = url.length;
+    var ran = Math.random().toString(32).substring(2, 5) + Math.random().toString(32).substring(2, 5);
+    return len.length < ran.length ? len : ran;
+}
+
 const createAndSaveShorty = (url,done)=>{
     const shortened = new Shorty({url:url, short:makeShort(url)});
     shortened.save((err,data)=>{
@@ -47,5 +52,5 @@ app.post('/api/shorturl/new', (req, res) => {
 })
 
 app.listen(port, ()=>{
-    console.log('node.js can hear you...');
+    console.log('oh fuck, hold on a sec...');
 });
