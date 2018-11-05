@@ -30,7 +30,7 @@ const createAndSaveShorty = (url,done)=>{
 //middlewares
 app.use(cors());
 app.use(bodyparser.urlencoded({extended:false}));
-app.use('/public', express.static(process.cwd() + '/public');
+app.use('/public', express.static(process.cwd() + '/public'));
 
 //routes
 app.get('/', (req,res)=>{
