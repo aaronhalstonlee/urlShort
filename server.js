@@ -1,4 +1,5 @@
-require('dotenv').config();
+'use strict';
+//require('dotenv').config();
 const express = require('express');
 const mongo = require('mongodb');
 const mongoose = require('mongoose');
@@ -8,13 +9,13 @@ const app = express();
 const port = process.env.port || 3000;
 
 //connect to db
-mongoose.connect(process.env.MONGOLAB_URI);
+mongoose.connect(process.env.MONGOLAB_URI,{useMongoClient:true});
 
 //build db
 const Schema = mongoose.Schema;
 const urlSchema = new Schema({
     url: String,
-    short: Number
+    short: String
 });
 const Shorty = mongoose.model('Shorty', urlSchema);
 
@@ -22,14 +23,6 @@ const makeShort = (url) => {
     var len = url.length;
     var ran = Math.random().toString(32).substring(2, 5) + Math.random().toString(32).substring(2, 5);
     return len.length < ran.length ? len : ran;
-}
-
-const createAndSaveShorty = (url,done)=>{
-    const shortened = new Shorty({url:url, short:makeShort(url)});
-    shortened.save((err,data)=>{
-        if(err) done(err);
-        done(null,data);
-    })
 }
 
 //middlewares
@@ -42,15 +35,29 @@ app.get('/', (req,res)=>{
     res.sendFile(process.cwd() + '/views/index.html');
 });
 
-app.get('/api', (req,res)=>{
-    res.sendFile(process.cwd() + '/views/form.html');
-});
-
 app.post('/api/shorturl/new', (req, res) => {
-    createAndSaveShorty(req.body.url);
-    res.json(req.body.url);
+  var shortURL = makeShort(req.body.url)
+  const shortened = new Shorty({url: req.body.url, short: shortURL});
+  shortened.save((err, data)=>{
+    if(err) throw(err);
+    res.json({'url': req.body.url, 'short':shortURL});
+  });
+})
+
+app.get('/api/:url', (req, res) => {
+  //const url = req.params.url;
+  Shorty.find({short: req.params.url}, (err, data)=>{
+    if(err) throw(err);
+    res.redirect(301, data[0].url);
+  })
 })
 
 app.listen(port, ()=>{
     console.log('oh fuck, hold on a sec...');
+    setTimeout(()=>{
+          console.log('*shuffles papers around*');
+        }, 1100);
+    setTimeout(() => {
+        console.log('ok im ready now')
+    }, 2500);
 });
